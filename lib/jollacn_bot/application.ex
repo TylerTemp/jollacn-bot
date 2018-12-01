@@ -14,8 +14,9 @@ defmodule JollaCNBot.Application do
 
     children =
       basic_children
-      |> check_publish_weibo()
       |> check_subscribe_telegram()
+      |> check_telegram_bot()
+      |> check_publish_weibo()
 
     opts = [strategy: :one_for_one, name: JollaCNBot.Supervisor]
     Supervisor.start_link(children, opts)
@@ -39,9 +40,29 @@ defmodule JollaCNBot.Application do
     if Application.get_env(:jollacn_bot, :subscribe_telegram, nil) == nil do
       ori_children
     else
-      # throw "including telegram subscribe"
       Logger.info("including subscribe telegram")
       ori_children ++ [worker(JollaCNBot.Subscribe.Telegram.RabbitConsumer, [])]
+    end
+  end
+
+  def check_telegram_bot(ori_children) do
+    telegram_bot_config = Application.get_env(:jollacn_bot, :telegram_bot, [])
+
+    if Keyword.get(telegram_bot_config, :is_active, false) do
+      Logger.info("including telegram bot #{inspect(telegram_bot_config)}")
+      port = Keyword.fetch!(telegram_bot_config, :port)
+
+      ori_children ++
+        [
+          worker(JollaCNBot.TelegramBot.Worker, []),
+          Plug.Cowboy.child_spec(
+            scheme: :http,
+            plug: JollaCNBot.TelegramBot.Router,
+            options: [port: port]
+          )
+        ]
+    else
+      ori_children
     end
   end
 end

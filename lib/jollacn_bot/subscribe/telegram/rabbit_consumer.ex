@@ -15,10 +15,22 @@ defmodule JollaCNBot.Subscribe.Telegram.RabbitConsumer do
       prefetch_count: 5
     ]
 
-  def consume(payload, tag: _tag, redelivered?: _redelivered) do
+  def consume(payload, tag: tag, redelivered?: _redelivered) do
     # ack(tag)
-    IO.puts("received: #{payload}")
-    # throw "error consume message"
+    payload
+    |> Jason.decode!()
+    |> deliver_message()
+
+    # :ok
+    ack(tag)
+  end
+
+  def deliver_message(%{"type" => "weibo_comment"} = weibo_comment) do
+    # Logger.debug("rabbit deliver_message: #{inspect(weibo_comment)}")
+    JollaCNBot.TelegramBot.Worker.push_weibo_comment(weibo_comment)
+  end
+
+  def deliver_message(%{}) do
     :ok
   end
 end

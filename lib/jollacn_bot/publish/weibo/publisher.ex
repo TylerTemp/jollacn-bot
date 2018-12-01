@@ -7,7 +7,7 @@ defmodule JollaCNBot.Publish.Weibo.Publisher do
   end
 
   def init(state) do
-    weibo_comment_loop(2_000)
+    weibo_comment_loop(3_000)
     {:ok, state}
   end
 
@@ -30,7 +30,7 @@ defmodule JollaCNBot.Publish.Weibo.Publisher do
   # end
 
   defp weibo_comment() do
-    case JollaCNBot.Publish.WeiBo.MobileAPI.run() do
+    case JollaCNBot.API.Weibo.run() do
       {:error, _} ->
         :error
 
@@ -50,7 +50,8 @@ defmodule JollaCNBot.Publish.Weibo.Publisher do
                   "ok" => true,
                   "id" => comment_id,
                   "text" => comment_text,
-                  "user_name" => comment_user_name
+                  "user_name" => comment_user_name,
+                  "url" => url
                 } ->
                   msg_id = "weibo_comment:#{blog_id}:#{comment_id}"
 
@@ -61,7 +62,8 @@ defmodule JollaCNBot.Publish.Weibo.Publisher do
                     "blog_id" => blog_id,
                     "comment_id" => comment_id,
                     "comment_text" => comment_text,
-                    "user_name" => comment_user_name
+                    "user_name" => comment_user_name,
+                    "url" => url
                   }
 
                   case Redix.command(:redis, ["GET", "msg_status:#{msg_id}"]) do
@@ -91,12 +93,11 @@ defmodule JollaCNBot.Publish.Weibo.Publisher do
 
                       publish_result
 
-                    {:ok, pub_readable_time} ->
-                      # IO.puts("GET result #{inspect time}")
+                    {:ok, _pub_readable_time} ->
                       # already published
-                      Logger.debug(
-                        "msg already published at #{pub_readable_time}, #{comment_text}"
-                      )
+                      # Logger.debug(
+                      #   "msg already published at #{pub_readable_time}, #{comment_text}"
+                      # )
 
                       :skip
 

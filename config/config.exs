@@ -1,6 +1,6 @@
 use Mix.Config
 
-# t.me/Jollacn_bot
+# t.me/jollacn_bot
 
 config :logger,
   # handle_otp_reports: false,
@@ -30,18 +30,24 @@ config :jollacn_bot, JollaCNBot.Connection.RabbitMQ,
   virtual_host: "/",
   connection_timeout: 15_000
 
-
 config :jollacn_bot, :publish_channel,
   queue: [
-    name: "test_pubsub3_queue",
+    name: "j_pubsub_queue",
     # error_name: "test_pubsub3_queue_error",
-    routing_key: "test_pubsub3_queue"
+    routing_key: "j_pubsub_queue"
   ],
   exchange: [
-    name: "test_pubsub3_exchange"
+    name: "j_pubsub_exchange"
   ]
 
+# import_config "worker/publish_weibo.exs"
+# import_config "worker/subscribe_telegram.exs"
+# import_config "worker/telegram_bot.exs"
+# config :jollacn_bot, :telegram_bot,
+#   proxy: {:socks5, '127.0.0.1', 8000},  # if need proxy
+#   port: 9000  # for change telegram bot webhook, as localhost:{port}/webhook
 
+import_config "private.exs"
 
 case Mix.env() do
   env = :prod ->

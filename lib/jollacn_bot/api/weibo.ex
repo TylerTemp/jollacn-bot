@@ -1,4 +1,4 @@
-defmodule JollaCNBot.Publish.WeiBo.MobileAPI do
+defmodule JollaCNBot.API.Weibo do
   require Logger
 
   @entrance_url "https://m.weibo.cn/api/container/getIndex?containerid=1076032805310855"
@@ -86,7 +86,11 @@ defmodule JollaCNBot.Publish.WeiBo.MobileAPI do
          ) do
       {:ok, %{status_code: status_code, body: body}}
       when status_code >= 200 and status_code < 400 ->
-        result = Jason.decode!(body)
+        result =
+          body
+          |> Jason.decode!()
+          |> Map.put("url", url)
+
         {:ok, result}
 
       {:ok, %{status_code: status_code, body: body}} ->
@@ -106,7 +110,7 @@ defmodule JollaCNBot.Publish.WeiBo.MobileAPI do
     {:error, "failed to parse"}
   end
 
-  def extract_comments({:ok, %{"data" => %{"data" => comment_datas}}}) do
+  def extract_comments({:ok, %{"url" => url, "data" => %{"data" => comment_datas}}}) do
     result =
       Enum.map(comment_datas, fn
         %{"text" => text, "id" => id, "user" => %{"id" => user_id, "screen_name" => user_name}} ->
@@ -115,7 +119,8 @@ defmodule JollaCNBot.Publish.WeiBo.MobileAPI do
             "text" => text,
             "id" => id,
             "user_id" => user_id,
-            "user_name" => user_name
+            "user_name" => user_name,
+            "url" => url
           }
 
         struct ->

@@ -20,7 +20,9 @@ defmodule JollaCNBot.MixProject do
         :jason,
         :rbmq,
         :redix,
-        :timex
+        :timex,
+        :plug,
+        :pandex
       ],
       mod: {JollaCNBot.Application, []}
     ]
@@ -32,8 +34,10 @@ defmodule JollaCNBot.MixProject do
       {:jason, "~> 1.1"},
       # {:amqp, "~> 1.0"}
       {:redix, ">= 0.0.0"},
-      {:rbmq, git: "https://github.com/Nebo15/rbmq.git"},
-      {:timex, "~> 3.1"}
+      {:rbmq, git: "https://github.com/TylerTemp/rbmq.git"},
+      {:timex, "~> 3.1"},
+      {:plug_cowboy, "~> 2.0"},
+      {:pandex, "~> 0.1.0"}
     ]
   end
 end
