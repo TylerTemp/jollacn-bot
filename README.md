@@ -4,6 +4,7 @@
 
 ```
 sudo apt-get install pandoc
+sudo apt-get install redis-server
 ```
 
 ## redis storage
