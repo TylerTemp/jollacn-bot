@@ -180,7 +180,16 @@ defmodule JollaCNBot.TelegramBot.Worker do
     |> get_updates_loop()
   end
 
-  defp get_updates_loop(interval) do
+  defp get_updates_loop(interval, ignore_config \\ nil) do
+    actual_do_it = if ignore_config == nil do
+      config = :jollacn_bot
+        |> Application.fetch_env!(:telegram_bot)
+        |> Keyword.fetch!(:notice_mode)
+      config == :pull
+    else
+      ignore_config
+    end
+
     Logger.debug(
       "JollaCNBot.TelegramBot.Worker:get_updates will work in #{interval / 1000} seconds"
     )
