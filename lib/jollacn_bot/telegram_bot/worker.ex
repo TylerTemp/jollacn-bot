@@ -189,11 +189,12 @@ defmodule JollaCNBot.TelegramBot.Worker do
     else
       ignore_config
     end
+    if actual_do_it do
+      Logger.debug(
+        "JollaCNBot.TelegramBot.Worker:get_updates will work in #{interval / 1000} seconds"
+      )
 
-    Logger.debug(
-      "JollaCNBot.TelegramBot.Worker:get_updates will work in #{interval / 1000} seconds"
-    )
-
-    Process.send_after(self(), :get_updates, interval)
+      Process.send_after(self(), :get_updates, interval)
+    end
   end
 end

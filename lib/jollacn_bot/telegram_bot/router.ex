@@ -48,7 +48,7 @@ defmodule JollaCNBot.TelegramBot.Router do
            "message" => %{
              "message_id" => message_id,
              "chat" => %{"id" => chat_id},
-             "text" => content
+             "text" => _content
            }
          }} ->
            # {:ok, {chat_id, message_id, "说啥，听不懂：#{content}"}}
