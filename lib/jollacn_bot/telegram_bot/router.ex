@@ -51,17 +51,19 @@ defmodule JollaCNBot.TelegramBot.Router do
              "text" => content
            }
          }} ->
-          {:ok, {chat_id, message_id, "说啥，听不懂：#{content}"}}
+           # {:ok, {chat_id, message_id, "说啥，听不懂：#{content}"}}
+          {:ok, {chat_id, message_id, ""}}
 
         {:ok, %{"message" => %{"chat" => %{"id" => chat_id}}}} ->
-          {:ok, {chat_id, nil, "说啥，听不懂"}}
+          # {:ok, {chat_id, nil, "说啥，听不懂"}}
+          {:ok, {chat_id, nil, ""}}
 
         {:ok, req_body} ->
           Logger.error("failed to understand request #{inspect(req_body)}")
           {:ok, {nil, nil, ""}}
       end
 
-    if chat_id != nil do
+    if chat_id != nil && reply_message != "" do
       options =
         if message_id == nil do
           []
