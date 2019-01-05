@@ -1,5 +1,4 @@
 defmodule JollaCNBot.API.Telegram do
-
   require Logger
 
   @timeout 15_000
