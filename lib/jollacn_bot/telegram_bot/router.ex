@@ -42,7 +42,7 @@ defmodule JollaCNBot.TelegramBot.Router do
                   {:ok, {chat_id, message_id, "已经订阅过微博评论了，你想整啥？"}}
 
                 {:ok, _chat_id} ->
-                  {:ok, {chat_id, message_id, "订阅成功"}}
+                  {:ok, {chat_id, message_id, "微博评论订阅成功"}}
               end
 
             "twitter_post" ->
@@ -54,7 +54,7 @@ defmodule JollaCNBot.TelegramBot.Router do
                   {:ok, {chat_id, message_id, "已经订阅过Twitter了，你想整啥？"}}
 
                 {:ok, _chat_id} ->
-                  {:ok, {chat_id, message_id, "订阅成功"}}
+                  {:ok, {chat_id, message_id, "Twitter订阅成功"}}
               end
 
             _ ->

@@ -37,7 +37,7 @@ tar -xzf jollacn_bot.tar.gz
 
 sudo supervisorctl reread
 sudo supervisorctl update
-sudo supervisorctl start 'jarvis:jollacn_bot'
+sudo supervisorctl start 'jollacn_bot'
 ```
 
 ## upgrade ##
