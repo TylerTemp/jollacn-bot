@@ -16,6 +16,7 @@ defmodule JollaCNBot.Publish.Boardcast do
         |> Keyword.fetch!(:exchange)
     ],
     options: [
-      durable: true
+      durable: true,
+      no_ack: false,
     ]
 end

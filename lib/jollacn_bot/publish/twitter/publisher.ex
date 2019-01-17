@@ -48,6 +48,9 @@ defmodule JollaCNBot.Publish.Twitter.Publisher do
   end
 
   def deliver_message(twitts) do
+    # Logger.debug(fn ->
+    #   "get twitters #{length(twitts)} to deliver"
+    # end)
     publish_count =
       twitts
       |> Enum.map(fn %{
@@ -69,6 +72,9 @@ defmodule JollaCNBot.Publish.Twitter.Publisher do
 
           case Redix.command(:redis, ["GET", "msg_status:#{msg_id}"]) do
             {:ok, nil} ->
+              # Logger.debug(fn ->
+              #   "push twitter #{inspect msg_content}"
+              # end)
               publish_result =
                 msg_content
                 |> Jason.encode!()
@@ -95,7 +101,7 @@ defmodule JollaCNBot.Publish.Twitter.Publisher do
             {:ok, _pub_readable_time} ->
               # already published
               # Logger.debug(
-              #   "msg already published at #{pub_readable_time}, #{comment_text}"
+              #   "twitter already published at #{pub_readable_time}, #{inspect msg_content}"
               # )
 
               :skip
