@@ -73,7 +73,7 @@ defmodule JollaCNBot.Publish.Weibo.Publisher do
                       publish_result =
                         msg_content
                         |> Jason.encode!()
-                        |> JollaCNBot.Publish.Weibo.RabbitProducer.publish()
+                        |> JollaCNBot.Publish.Boardcast.publish()
 
                       # publish will return :ok if succeed
                       if publish_result == :ok do

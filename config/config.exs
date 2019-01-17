@@ -10,8 +10,8 @@ config :logger,
 
 config :logger, :console,
   # format: {JollaCNBot.Util.Logger, :pretty_console},
-  format: "$date $time [$level] $message\n",
-  # metadata: :all,
+  format: "$date $time [$level] $message | $metadata\n",
+  metadata: :all,
   level: :debug
 
 # config :jollacn_bot, JollaCNBot.Connection.RabbitMQ,

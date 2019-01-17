@@ -27,20 +27,40 @@ defmodule JollaCNBot.TelegramBot.Router do
            "message" => %{
              "message_id" => message_id,
              "chat" => %{"id" => chat_id},
-             "text" => "/sub" <> _
+             "text" => "/sub" <> sub_type
            }
          }} ->
-          Logger.debug("try to sub #{chat_id}")
+          Logger.debug("try to sub #{chat_id} on #{sub_type}")
 
-          case JollaCNBot.TelegramBot.Worker.sub_weibo_comment(chat_id) do
-            {:error, reason} ->
-              {:ok, {chat_id, message_id, "bong! 服务器炸了：#{reason}"}}
+          case String.trim(sub_type) do
+            "weibo_comment" ->
+              case JollaCNBot.TelegramBot.Worker.sub_weibo_comment(chat_id) do
+                {:error, reason} ->
+                  {:ok, {chat_id, message_id, "bong! 服务器炸了：#{reason}"}}
 
-            {:ok, :exist} ->
-              {:ok, {chat_id, message_id, "已经订阅过了，你想整啥？"}}
+                {:ok, :exist} ->
+                  {:ok, {chat_id, message_id, "已经订阅过微博评论了，你想整啥？"}}
 
-            {:ok, _chat_id} ->
-              {:ok, {chat_id, message_id, "订阅成功"}}
+                {:ok, _chat_id} ->
+                  {:ok, {chat_id, message_id, "订阅成功"}}
+              end
+
+            "twitter_post" ->
+              case JollaCNBot.TelegramBot.Worker.sub_twitter_post(chat_id) do
+                {:error, reason} ->
+                  {:ok, {chat_id, message_id, "bong! 服务器炸了：#{reason}"}}
+
+                {:ok, :exist} ->
+                  {:ok, {chat_id, message_id, "已经订阅过Twitter了，你想整啥？"}}
+
+                {:ok, _chat_id} ->
+                  {:ok, {chat_id, message_id, "订阅成功"}}
+              end
+
+            _ ->
+              {:ok,
+               {chat_id, message_id,
+                "请输入正确的订阅类型：\n/sub twitter_post -- 订阅Twitter更新\n/sub weibo_comment -- 订阅微博评论"}}
           end
 
         {:ok,

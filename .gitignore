@@ -28,3 +28,4 @@ jollacn_bot-*.tar
 /config/private.exs
 /config/dev.exs
 /config/prod.exs
+/.temp

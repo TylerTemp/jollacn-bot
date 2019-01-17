@@ -13,28 +13,6 @@ defmodule JollaCNBot.TelegramBot.Worker do
     {:ok, state}
   end
 
-  # TODO: proper way to unsub?
-  def handle_call({:sub_weibo_comment, chat_id}, _from, state) do
-    result =
-      case Redix.command(:redis, ["SADD", "tg:sub:weibo_comment", "#{chat_id}"]) do
-        {:error, reason} = result ->
-          Logger.error(
-            "failed to execute redis SADD tg:sub:weibo_comment #{chat_id}: #{inspect(reason)}"
-          )
-
-          result
-
-        {:ok, 0} ->
-          {:ok, :exist}
-
-        {:ok, 1} ->
-          Logger.info("new sub on weibo comment #{chat_id}")
-          {:ok, chat_id}
-      end
-
-    {:reply, result, state}
-  end
-
   # def handle_info({:sub_weibo_comment, chat_id}, state) do
   #   {:reply, _result, new_state} = handle_call({:sub_weibo_comment, chat_id}, self(), state)
   #   {:noreply, new_state}
@@ -131,6 +109,75 @@ defmodule JollaCNBot.TelegramBot.Worker do
     {:noreply, state}
   end
 
+  def handle_cast(
+        {:push_twitter_post,
+         %{
+           "id" => _msg_id,
+           "owner_name" => owner_name,
+           "name" => twitter_name,
+           # 'at': username,
+           # 'timestamp_ms': timestamp_ms,
+           # 'content_md': content_md,
+           "content" => content_html,
+           "link" => link,
+           "retweet" => is_retweet
+         } = _comment},
+        state
+      ) do
+    case Pandex.html_to_plain(content_html) do
+      {:error, reason} = result ->
+        Logger.error("failed to strip html from #{content_html}: #{inspect(reason)}")
+        result
+
+      {:ok, content_plain} ->
+        content =
+          "[#{owner_name}#{
+            if is_retweet do
+              "转推#{twitter_name}"
+            else
+              "发推"
+            end
+          }](#{link}):\n#{content_plain}"
+
+        case Redix.command(:redis, ["SMEMBERS", "tg:sub:twitter_post"]) do
+          {:error, reason} = result ->
+            Logger.error(
+              "failed to execute redis LRANGE tg:sub:weibo_comment: #{inspect(reason)}"
+            )
+
+            result
+
+          {:ok, chat_id_strs} ->
+            ok_count =
+              chat_id_strs
+              |> Enum.map(&String.to_integer/1)
+              |> Enum.map(fn chat_id ->
+                JollaCNBot.API.Telegram.send_message(chat_id, content,
+                  parse_mode: "Markdown",
+                  disable_web_page_preview: true
+                )
+              end)
+              |> Enum.count(fn
+                {:ok, _} -> true
+                _ -> false
+              end)
+
+            total_count = length(chat_id_strs)
+
+            if total_count > 0 do
+              if total_count == ok_count do
+                Logger.info("telegram push_twitter_post #{ok_count}/#{total_count}")
+              else
+                Logger.warn("telegram push_twitter_post #{ok_count}/#{total_count}")
+              end
+            end
+        end
+    end
+
+    # Logger.warn("fake receive, pub to telegram: #{user_name} / #{comment_text}")
+    {:noreply, state}
+  end
+
   def handle_info(:get_updates, state) do
     start_time = :os.system_time(:milli_seconds)
     Logger.debug("telegram bot get updates starts")
@@ -168,9 +215,43 @@ defmodule JollaCNBot.TelegramBot.Worker do
   end
 
   def sub_weibo_comment(chat_id) do
-    # Logger.debug("genserver push_weibo_comment: #{inspect(comment)}")
-    # Logger.debug("genserver push_weibo_comment to #{__MODULE__}")
-    GenServer.call(__MODULE__, {:sub_weibo_comment, chat_id})
+    case Redix.command(:redis, ["SADD", "tg:sub:weibo_comment", "#{chat_id}"]) do
+      {:error, reason} = result ->
+        Logger.error(
+          "failed to execute redis SADD tg:sub:weibo_comment #{chat_id}: #{inspect(reason)}"
+        )
+
+        result
+
+      {:ok, 0} ->
+        {:ok, :exist}
+
+      {:ok, 1} ->
+        Logger.info("new sub on weibo comment #{chat_id}")
+        {:ok, chat_id}
+    end
+  end
+
+  def push_twitter_post(twitter) do
+    GenServer.cast(__MODULE__, {:push_twitter_post, twitter})
+  end
+
+  def sub_twitter_post(chat_id) do
+    case Redix.command(:redis, ["SADD", "tg:sub:twitter_post", "#{chat_id}"]) do
+      {:error, reason} = result ->
+        Logger.error(
+          "failed to execute redis SADD tg:sub:twitter_post #{chat_id}: #{inspect(reason)}"
+        )
+
+        result
+
+      {:ok, 0} ->
+        {:ok, :exist}
+
+      {:ok, 1} ->
+        Logger.info("new sub on twitter post #{chat_id}")
+        {:ok, chat_id}
+    end
   end
 
   defp get_updates_loop() do

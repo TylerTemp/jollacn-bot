@@ -1,4 +1,4 @@
-defmodule JollaCNBot.Publish.Weibo.RabbitProducer do
+defmodule JollaCNBot.Publish.Boardcast do
   use RBMQ.Producer,
     connection: JollaCNBot.Connection.RabbitMQ,
     # Queue params
@@ -14,5 +14,8 @@ defmodule JollaCNBot.Publish.Weibo.RabbitProducer do
       | :jollacn_bot
         |> Application.fetch_env!(:publish_channel)
         |> Keyword.fetch!(:exchange)
+    ],
+    options: [
+      durable: true
     ]
 end

@@ -9,7 +9,8 @@ defmodule JollaCNBot.Application do
     basic_children = [
       # worker(JollaCNBot.Publish.Weibo, []),
       supervisor(JollaCNBot.Connection.RabbitMQ, []),
-      {Redix, name: :redis}
+      {Redix, name: :redis},
+      worker(JollaCNBot.Publish.Boardcast, [])
     ]
 
     children =
@@ -17,23 +18,10 @@ defmodule JollaCNBot.Application do
       |> check_subscribe_telegram()
       |> check_telegram_bot()
       |> check_publish_weibo()
+      |> check_publish_twitter()
 
     opts = [strategy: :one_for_one, name: JollaCNBot.Supervisor]
     Supervisor.start_link(children, opts)
-  end
-
-  defp check_publish_weibo(ori_children) do
-    if Application.get_env(:jollacn_bot, :publish_weibo, nil) == nil do
-      ori_children
-    else
-      Logger.info("including publish weibo")
-
-      ori_children ++
-        [
-          worker(JollaCNBot.Publish.Weibo.Publisher, []),
-          worker(JollaCNBot.Publish.Weibo.RabbitProducer, [])
-        ]
-    end
   end
 
   defp check_subscribe_telegram(ori_children) do
@@ -63,6 +51,34 @@ defmodule JollaCNBot.Application do
         ]
     else
       ori_children
+    end
+  end
+
+  defp check_publish_weibo(ori_children) do
+    if Application.get_env(:jollacn_bot, :publish_weibo, nil) == nil do
+      ori_children
+    else
+      Logger.info("including publish weibo")
+
+      ori_children ++
+        [
+          worker(JollaCNBot.Publish.Weibo.Publisher, [])
+        ]
+    end
+  end
+
+  defp check_publish_twitter(ori_children) do
+    if Application.get_env(:jollacn_bot, :publish_twitter, nil) == nil do
+      ori_children
+    else
+      Logger.info("including publish twitter")
+
+      ori_children ++
+        [
+          worker(JollaCNBot.Publish.Twitter.Publisher, []),
+          worker(JollaCNBot.Publish.Twitter.RPC.RabbitProducer, []),
+          worker(JollaCNBot.Publish.Twitter.RPC.RabbitConsumer, [])
+        ]
     end
   end
 end
