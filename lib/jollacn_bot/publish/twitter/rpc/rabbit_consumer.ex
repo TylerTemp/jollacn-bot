@@ -4,9 +4,9 @@ defmodule JollaCNBot.Publish.Twitter.RPC.RabbitConsumer do
     connection: JollaCNBot.Connection.RabbitMQ,
     queue:
       :jollacn_bot
-      |> Application.fetch_env!(:publish_twitter)
-      |> Keyword.fetch!(:consumer)
-      |> Keyword.fetch!(:queue),
+      |> Application.get_env(:publish_twitter, [])
+      |> Keyword.get(:consumer, [])
+      |> Keyword.get(:queue, []),
     qos: [
       prefetch_count: 5
     ],

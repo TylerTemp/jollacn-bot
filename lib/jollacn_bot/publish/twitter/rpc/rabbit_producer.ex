@@ -5,17 +5,17 @@ defmodule JollaCNBot.Publish.Twitter.RPC.RabbitProducer do
       {:durable, true},
       {:no_ack, true}
       | :jollacn_bot
-        |> Application.fetch_env!(:publish_twitter)
-        |> Keyword.fetch!(:producer)
-        |> Keyword.fetch!(:queue)
+        |> Application.get_env(:publish_twitter, [])
+        |> Keyword.get(:producer, [])
+        |> Keyword.get(:queue, [])
     ],
     exchange: [
       {:type, :fanout},
       {:durable, true}
       | :jollacn_bot
-        |> Application.fetch_env!(:publish_twitter)
-        |> Keyword.fetch!(:producer)
-        |> Keyword.fetch!(:exchange)
+        |> Application.get_env(:publish_twitter, [])
+        |> Keyword.get(:producer, [])
+        |> Keyword.get(:exchange, [])
     ],
     options: [
       durable: true
