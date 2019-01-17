@@ -20,7 +20,7 @@ defmodule JollaCNBot.Publish.Twitter.Publisher do
   end
 
   def twitter_loop(interval) do
-    Logger.debug("Publish.Weibo.Publisher will work in #{interval / 1000} seconds")
+    Logger.debug("Publish.Twitter.Publisher will work in #{interval / 1000} seconds")
     Process.send_after(self(), :twitter_loop, interval)
   end
 
