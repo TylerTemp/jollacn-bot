@@ -17,6 +17,6 @@ defmodule JollaCNBot.Publish.Boardcast do
     ],
     options: [
       durable: true,
-      no_ack: false,
+      no_ack: false
     ]
 end

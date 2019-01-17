@@ -22,6 +22,7 @@ defmodule JollaCNBot.MixProject do
         :redix,
         :timex,
         :plug,
+        :plug_cowboy,
         :pandex
       ],
       mod: {JollaCNBot.Application, []}
@@ -38,7 +39,8 @@ defmodule JollaCNBot.MixProject do
       # {:rbmq, path: "deps/rbmq"},
       {:timex, "~> 3.1"},
       {:plug_cowboy, "~> 2.0"},
-      {:pandex, "~> 0.1.0"}
+      {:pandex, "~> 0.1.0"},
+      {:distillery, "~> 1.5", runtime: false}
     ]
   end
 end

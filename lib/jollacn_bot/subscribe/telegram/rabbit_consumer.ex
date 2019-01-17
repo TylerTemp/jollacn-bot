@@ -15,7 +15,7 @@ defmodule JollaCNBot.Subscribe.Telegram.RabbitConsumer do
     ],
     options: [
       durable: true,
-      no_ack: false,
+      no_ack: false
     ]
 
   def consume(payload, props) do
