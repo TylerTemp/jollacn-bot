@@ -31,8 +31,19 @@ defmodule JollaCNBot.TelegramBot.Router do
            }
          }} ->
           Logger.debug("try to sub #{chat_id} on #{sub_type}")
+          trim_at = case sub_type do
+            "@" <> _ ->
+              case String.split(sub_type, " ", parts: 2, trim: true) do
+                [one] ->
+                  one
+                [_, sub] ->
+                  String.trim(sub)
+              end
+            value ->
+              String.trim(value)
+          end
 
-          case String.trim(sub_type) do
+          case trim_at do
             "weibo_comment" ->
               case JollaCNBot.TelegramBot.Worker.sub_weibo_comment(chat_id) do
                 {:error, reason} ->
