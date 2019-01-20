@@ -150,7 +150,7 @@ defmodule JollaCNBot.TelegramBot.Router do
   end
 
   defp command_trim_at("@" <> left) do
-    case String.split(sub_type, " ", parts: 2, trim: true) do
+    case String.split(left, " ", parts: 2, trim: true) do
       [one] ->
         one
 
