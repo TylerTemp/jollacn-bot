@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
-IP="$1"
-USER="root"
-
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 PROJECTPATH="$(dirname ${SCRIPTPATH})"
 PROJECTDIR="$(basename ${PROJECTPATH})"
 
-cd PROJECTPATH;
+cd ${PROJECTPATH};
 
 export version="$(cat mix.exs | grep version | awk '{print substr($2, 2, length($2)-3)}')"
 echo "version=${version}"

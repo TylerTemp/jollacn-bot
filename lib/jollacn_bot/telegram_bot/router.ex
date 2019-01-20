@@ -73,8 +73,8 @@ defmodule JollaCNBot.TelegramBot.Router do
              "text" => "/unsub" <> unsub_type
            }
          }} ->
-          Logger.debug("try to unsub #{chat_id} on #{sub_type}")
-          trimed_command_body = sub_type |> command_trim_at() |> String.trim()
+          Logger.debug("try to unsub #{chat_id} on #{unsub_type}")
+          trimed_command_body = unsub_type |> command_trim_at() |> String.trim()
 
           case trimed_command_body do
             "weibo_comment" ->
@@ -159,7 +159,7 @@ defmodule JollaCNBot.TelegramBot.Router do
     end
   end
 
-  def command_trim_at(command) do
+  defp command_trim_at(command) do
     command
   end
 
