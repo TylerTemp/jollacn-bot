@@ -31,19 +31,9 @@ defmodule JollaCNBot.TelegramBot.Router do
            }
          }} ->
           Logger.debug("try to sub #{chat_id} on #{sub_type}")
-          trim_at = case sub_type do
-            "@" <> _ ->
-              case String.split(sub_type, " ", parts: 2, trim: true) do
-                [one] ->
-                  one
-                [_, sub] ->
-                  String.trim(sub)
-              end
-            value ->
-              String.trim(value)
-          end
+          trimed_command_body = sub_type |> command_trim_at() |> String.trim()
 
-          case trim_at do
+          case trimed_command_body do
             "weibo_comment" ->
               case JollaCNBot.TelegramBot.Worker.sub_weibo_comment(chat_id) do
                 {:error, reason} ->
@@ -72,6 +62,49 @@ defmodule JollaCNBot.TelegramBot.Router do
               {:ok,
                {chat_id, message_id,
                 "请输入正确的订阅类型：\n/sub twitter_post -- 订阅Twitter更新\n/sub weibo_comment -- 订阅微博评论"}}
+          end
+
+        # unsub
+        {:ok,
+         %{
+           "message" => %{
+             "message_id" => message_id,
+             "chat" => %{"id" => chat_id},
+             "text" => "/unsub" <> unsub_type
+           }
+         }} ->
+          Logger.debug("try to unsub #{chat_id} on #{sub_type}")
+          trimed_command_body = sub_type |> command_trim_at() |> String.trim()
+
+          case trimed_command_body do
+            "weibo_comment" ->
+              case JollaCNBot.TelegramBot.Worker.unsub_weibo_comment(chat_id) do
+                {:error, reason} ->
+                  {:ok, {chat_id, message_id, "bong! 服务器炸了：#{reason}"}}
+
+                {:ok, :notfound} ->
+                  {:ok, {chat_id, message_id, "你没有订阅过微博评论"}}
+
+                {:ok, _chat_id} ->
+                  {:ok, {chat_id, message_id, "已取消微博评论订阅"}}
+              end
+
+            "twitter_post" ->
+              case JollaCNBot.TelegramBot.Worker.unsub_twitter_post(chat_id) do
+                {:error, reason} ->
+                  {:ok, {chat_id, message_id, "bong! 服务器炸了：#{reason}"}}
+
+                {:ok, :notfound} ->
+                  {:ok, {chat_id, message_id, "你没有订阅过Twitter"}}
+
+                {:ok, _chat_id} ->
+                  {:ok, {chat_id, message_id, "已取消Twitter订阅"}}
+              end
+
+            _ ->
+              {:ok,
+               {chat_id, message_id,
+                "请输入正确的订阅类型：\n/unsub twitter_post -- 取消订阅Twitter更新\n/unsub weibo_comment -- 取消订阅微博评论"}}
           end
 
         {:ok,
@@ -114,6 +147,20 @@ defmodule JollaCNBot.TelegramBot.Router do
       |> put_resp_header("Content-Type", "text/plain")
       |> send_resp(500, "False")
     end
+  end
+
+  defp command_trim_at("@" <> left) do
+    case String.split(sub_type, " ", parts: 2, trim: true) do
+      [one] ->
+        one
+
+      [_, sub] ->
+        String.trim(sub)
+    end
+  end
+
+  def command_trim_at(command) do
+    command
   end
 
   match _ do

@@ -232,6 +232,24 @@ defmodule JollaCNBot.TelegramBot.Worker do
     end
   end
 
+  def unsub_weibo_comment(chat_id) do
+    case Redix.command(:redis, ["SREM", "tg:sub:weibo_comment", "#{chat_id}"]) do
+      {:error, reason} = result ->
+        Logger.error(
+          "failed to execute redis SREM tg:sub:weibo_comment #{chat_id}: #{inspect(reason)}"
+        )
+
+        result
+
+      {:ok, 0} ->
+        {:ok, :notfund}
+
+      {:ok, 1} ->
+        Logger.info("unsub on weibo comment #{chat_id}")
+        {:ok, chat_id}
+    end
+  end
+
   def push_twitter_post(twitter) do
     GenServer.cast(__MODULE__, {:push_twitter_post, twitter})
   end
@@ -250,6 +268,24 @@ defmodule JollaCNBot.TelegramBot.Worker do
 
       {:ok, 1} ->
         Logger.info("new sub on twitter post #{chat_id}")
+        {:ok, chat_id}
+    end
+  end
+
+  def unsub_twitter_post(chat_id) do
+    case Redix.command(:redis, ["SREM", "tg:sub:twitter_post", "#{chat_id}"]) do
+      {:error, reason} = result ->
+        Logger.error(
+          "failed to execute redis SADD tg:sub:twitter_post #{chat_id}: #{inspect(reason)}"
+        )
+
+        result
+
+      {:ok, 0} ->
+        {:ok, :notfund}
+
+      {:ok, 1} ->
+        Logger.info("unsub on twitter comment #{chat_id}")
         {:ok, chat_id}
     end
   end
